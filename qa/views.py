@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, abort
 
 from models import Question
 
@@ -32,4 +32,10 @@ def write():
 @qa.route('/detail/<int:q_id>')
 def detail(q_id):
     """ 问题详情 """
-    return render_template('detail.html')
+    # 1. 查询问题信息
+    question = Question.query.get(q_id)
+    if not question.is_valid:
+        abort(404)
+    # 2. 展示第一条回答信息
+    answer = question.answer_list.filter_by(is_valid=True).first()
+    return render_template('detail.html', question=question, answer=answer)
